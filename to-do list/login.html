@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Login - My To-Do List</title>
+
+    <!-- Normalize CSS for consistent rendering -->
+    <link rel="stylesheet" href="css/normalize.css" />
+    <link rel="stylesheet" href="css/all.min.css" />
+    <link rel="stylesheet" href="css/main.css" />
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        Login <span><i class="fa-solid fa-circle-user"></i></span>
+    </header>
+
+    <!-- Home Button -->
+    <div class="home-button">
+        <a href="index.html" aria-label="Go to Home Page"><i class="fa-solid fa-house"></i></a>
+    </div>
+
+    <!-- Main Container -->
+    <div class="container">
+        <!-- Login Form -->
+        <form 
+            class="form-container" 
+            onsubmit="return validateLogin(event)" 
+            method="POST" 
+            action="/api/login"
+        >
+            <div class="input-group">
+                <label for="username">Username:</label>
+                <input 
+                    type="text" 
+                    id="username" 
+                    name="username" 
+                    required 
+                    aria-label="Enter your username"
+                />
+            </div>
+
+            <div class="input-group">
+                <label for="password">Password:</label>
+                <input 
+                    type="password" 
+                    id="password" 
+                    name="password" 
+                    required 
+                    aria-label="Enter your password"
+                />
+            </div>
+
+            <button type="submit" class="button" aria-label="Login to your account">
+                Login
+            </button>
+        </form>
+
+        <!-- Link to Register -->
+        <div class="additional-links">
+            <p>Don't have an account? <a href="register.html">Register here</a></p>
+        </div>
+    </div>
+
+    <!-- Login Validation Script -->
+    <script>
+        function validateLogin(event) {
+            event.preventDefault();
+
+            const username = document.getElementById("username").value.trim();
+            const password = document.getElementById("password").value.trim();
+
+            // Validate username and password fields
+            if (!username) {
+                alert("Please enter a username.");
+                return false;
+            }
+
+            if (!password) {
+                alert("Please enter a password.");
+                return false;
+            }
+
+            const passwordRegex = /^[a-zA-Z0-9]+$/;
+            if (!passwordRegex.test(password)) {
+                alert("Password must contain only letters and numbers.");
+                return false;
+            }
+
+            // Make API request
+            fetch("/api/login", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ username, password })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    window.location.href = "main.html";
+                } else {
+                    alert(data.message || "Invalid username or password.");
+                }
+            })
+            .catch(error => {
+                console.error("Error:", error);
+                alert("An error occurred. Please try again.");
+            });
+
+            return false;
+        }
+    </script>
+</body>
+</html>

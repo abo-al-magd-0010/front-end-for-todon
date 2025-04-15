@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Task Management</title>
+  <link rel="stylesheet" href="css/main.css" />
+</head>
+<body>
+  <header class="header">
+    Manage Tasks <span><i class="fa-solid fa-list-check"></i></span>
+  </header>
+
+  <div class="home-button">
+    <a href="index.html"><i class="fa-solid fa-house"></i></a>
+  </div>
+
+  <div class="container">
+    <div class="form-container">
+      <h3>Add a New Task</h3>
+      <div class="input-group">
+        <input type="text" id="task-name" placeholder="Enter task name" required />
+      </div>
+      <div class="input-group">
+        <input type="text" id="task-description" placeholder="Enter task description" />
+      </div>
+      <div class="input-group">
+        <input type="datetime-local" id="task-date" />
+      </div>
+      <div class="input-group">
+        <label for="task-timer">Set Timer (Optional)</label>
+        <input type="number" id="task-timer" placeholder="Minutes" />
+      </div>
+      <div class="input-group">
+        <label for="repeat-task">Repeat Task</label>
+        <select id="repeat-task">
+          <option value="none">None</option>
+          <option value="daily">Daily</option>
+          <option value="weekly">Weekly</option>
+          <option value="monthly">Monthly</option>
+        </select>
+      </div>
+      <div class="input-group" id="repeat-days" style="display: none;">
+        <label>Select days of the week</label>
+        <input type="checkbox" value="monday"> Monday
+        <input type="checkbox" value="tuesday"> Tuesday
+        <input type="checkbox" value="wednesday"> Wednesday
+        <input type="checkbox" value="thursday"> Thursday
+        <input type="checkbox" value="friday"> Friday
+        <input type="checkbox" value="saturday"> Saturday
+        <input type="checkbox" value="sunday"> Sunday
+      </div>
+      <button class="button" onclick="addTask()">Add Task</button>
+    </div>
+
+    <ul id="task-list" style="list-style: none; padding: 20px;"></ul>
+  </div>
+
+  <script>
+    let tasks = [];
+    const completeSound = new Audio("assets/complete.mp3");
+
+    document.getElementById('repeat-task').addEventListener('change', function () {
+      const repeatDays = document.getElementById('repeat-days');
+      repeatDays.style.display = this.value === 'weekly' ? 'block' : 'none';
+    });
+
+    function addTask() {
+      const taskName = document.getElementById("task-name").value;
+      const taskDescription = document.getElementById("task-description").value;
+      const taskDate = document.getElementById("task-date").value;
+      const taskTimer = document.getElementById("task-timer").value;
+      const repeatTask = document.getElementById("repeat-task").value;
+      const repeatDays = Array.from(document.querySelectorAll("#repeat-days input:checked"))
+        .map(checkbox => checkbox.value);
+
+      if (!taskName) {
+        alert("Please enter a task name.");
+        return;
+      }
+
+      const newTask = {
+        id: Date.now(),
+        name: taskName,
+        description: taskDescription,
+        date: taskDate,
+        timer: taskTimer ? parseInt(taskTimer) : null,
+        repeat: repeatTask,
+        repeatDays: repeatDays,
+        completed: false,
+        progress: 0,
+        _timerStarted: false,
+      };
+
+      tasks.push(newTask);
+      renderTasks();
+      clearInputs();
+    }
+
+    function renderTasks() {
+      const list = document.getElementById("task-list");
+      list.innerHTML = "";
+
+      tasks.forEach((task) => {
+        const li = document.createElement("li");
+        li.classList.add("task-item");
+
+        const isTimeUp = task.timer && task.progress >= 100 && !task.completed;
+        const isTaskCompleted = task.completed;
+
+        const textColor = isTimeUp
+          ? 'red'
+          : isTaskCompleted
+            ? 'green'
+            : 'white';
+
+        li.innerHTML = `
+          <div style="display: flex; justify-content: space-between; align-items: center; background-color: var(--secondary-background-color); color: ${textColor}; padding: 10px; margin-bottom: 10px; border-radius: 8px;">
+            <span>${task.name}</span>
+            <div>
+              <button onclick="toggleComplete(${task.id})" style="background-color: var(--success-color); border: none; color: white; padding: 5px 10px; border-radius: 5px; cursor: pointer;" aria-label="Complete task ${task.name}">Complete</button>
+              <button onclick="deleteTask(${task.id})" style="background-color: var(--error-color); border: none; color: white; padding: 5px 10px; border-radius: 5px; cursor: pointer;" aria-label="Delete task ${task.name}">Delete</button>
+            </div>
+          </div>
+          ${task.timer ? `<div class="timer-bar" style="height: 5px; background-color: var(--accent-color); width: ${task.progress}%; transition: width 1s linear;"></div>` : ''}
+          <p style="color: ${textColor};">${task.description}</p>
+          <p style="color: ${textColor};">Due: ${task.date || 'No date set'}</p>
+        `;
+
+        list.appendChild(li);
+
+        if (task.timer && task.progress < 100 && !task._timerStarted) {
+          task._timerStarted = true;
+          startTimer(task);
+        }
+      });
+    }
+
+    function toggleComplete(id) {
+      const task = tasks.find((task) => task.id === id);
+      if (task && !task.completed) {
+        task.completed = true;
+        completeSound.play();
+        alert("You are a strong man! Task Completed!");
+        renderTasks();
+      }
+    }
+
+    function deleteTask(id) {
+      tasks = tasks.filter((task) => task.id !== id);
+      renderTasks();
+    }
+
+    function startTimer(task) {
+      let timer = task.timer * 60;
+      const timerInterval = setInterval(() => {
+        if (task.progress >= 100) {
+          clearInterval(timerInterval);
+          if (!task.completed) {
+            renderTasks(); // اللون الأحمر
+          }
+          return;
+        }
+        task.progress = Math.min((task.progress + (100 / timer)), 100);
+        renderTasks();
+      }, 1000);
+    }
+
+    function clearInputs() {
+      document.getElementById("task-name").value = "";
+      document.getElementById("task-description").value = "";
+      document.getElementById("task-date").value = "";
+      document.getElementById("task-timer").value = "";
+      document.getElementById("repeat-task").value = "none";
+      document.getElementById("repeat-days").style.display = "none";
+      document.querySelectorAll("#repeat-days input:checked").forEach(cb => cb.checked = false);
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Register to manage your tasks in the To-Do List app." />
+    <meta name="keywords" content="to-do, task management, list, register" />
+    <meta name="author" content="Your Name" />
+    <title>Register - My To-Do List</title>
+
+    <!-- Normalize CSS for consistent rendering -->
+    <link rel="stylesheet" href="css/normalize.css" />
+    <link rel="stylesheet" href="css/all.min.css" />
+    <link rel="stylesheet" href="css/main.css" />
+</head>
+<body>
+    <!-- Header -->
+    <header class="header" role="banner">
+        Register <span><i class="fa-solid fa-user" aria-hidden="true"></i></span>
+    </header>
+
+    <!-- Home Button -->
+    <div class="home-button">
+        <a href="index.html" aria-label="Go to Home Page"><i class="fa-solid fa-house"></i></a>
+    </div>
+
+    <!-- Main Container -->
+    <div class="container">
+        <!-- Register Form -->
+        <form 
+            class="form-container" 
+            onsubmit="return validatePasswords()" 
+            method="POST"
+            aria-labelledby="register-form"
+        >
+            <div class="input-group">
+                <label for="username">Username:</label>
+                <input 
+                    type="text" 
+                    id="username" 
+                    name="username" 
+                    required 
+                    aria-label="Enter your username"
+                />
+            </div>
+
+            <div class="input-group">
+                <label for="email">E-mail:</label>
+                <input 
+                    type="email" 
+                    id="email" 
+                    name="email" 
+                    required 
+                    aria-label="Enter your email address"
+                />
+            </div>
+
+            <div class="input-group">
+                <label for="password">Password:</label>
+                <input 
+                    type="password" 
+                    id="password" 
+                    name="password" 
+                    required 
+                    aria-label="Enter your password"
+                    aria-describedby="password-description"
+                />
+                <small id="password-description">Password must be between 6 and 10 characters, and contain only letters and numbers.</small>
+            </div>
+
+            <div class="input-group">
+                <label for="repeat-password">Repeat Password:</label>
+                <input 
+                    type="password" 
+                    id="repeat-password" 
+                    name="repeat-password" 
+                    required 
+                    aria-label="Repeat your password"
+                />
+            </div>
+
+            <button type="submit" class="button" aria-label="Submit the registration form">
+                Register
+            </button>
+        </form>
+
+        <!-- Link to Login -->
+        <div class="additional-links">
+            <p>Already have an account? <a href="login.html">Login here</a></p>
+        </div>
+    </div>
+
+    <!-- Password Validation Script -->
+    <script>
+        function validatePasswords() {
+            const password = document.getElementById("password").value.trim();
+            const repeatPassword = document.getElementById("repeat-password").value.trim();
+
+            if (password !== repeatPassword) {
+                alert("Passwords do not match. Please try again.");
+                return false;
+            }
+
+            if (password.length < 6 || password.length > 10) {
+                alert("Password must be between 6 and 10 characters.");
+                return false;
+            }
+
+            const regex = /^[a-zA-Z0-9]+$/;
+            if (!regex.test(password)) {
+                alert("Password must contain only letters and numbers.");
+                return false;
+            }
+
+            return true;
+        }
+    </script>
+
+    <!-- Add hover effect for button -->
+    <style>
+        .button {
+            transition: background-color 0.3s ease;
+        }
+        .button:hover {
+            background-color: #f2f2f2;
+        }
+    </style>
+</body>
+</html>

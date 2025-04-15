@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>My To-Do List - Home</title>
+
+  <!-- Main CSS -->
+  <link rel="stylesheet" href="css/main.css" />
+
+  <!-- Font Awesome for Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
+</head>
+<body>
+  <!-- Header -->
+  <header class="header">
+    My To-Do List <span><i class="fa-solid fa-list-check"></i></span>
+  </header>
+
+  <!-- Home Button -->
+  <div class="home-button">
+    <a href="index.html" aria-label="Go to Home Page"><i class="fa-solid fa-house"></i></a>
+  </div>
+
+  <!-- Main Container -->
+  <div class="container">
+    <div class="buttons-container">
+      <button class="button" onclick="createNewPage()" aria-label="Create a new task page">Create New Task Page</button>
+    </div>
+
+    <ul id="pages-list" style="list-style: none; padding: 20px;"></ul>
+
+    <!-- Message if no pages -->
+    <p id="no-pages-message" style="display: none; text-align: center;">You don't have any task pages yet. Create one to get started!</p>
+  </div>
+
+  <!-- Script to manage user pages -->
+  <script>
+    const email = localStorage.getItem("userEmail");
+
+    // Redirect if user not logged in
+    if (!email) {
+      alert("Please login to access your task pages.");
+      window.location.href = "login.html";
+    }
+
+    function getAllPages() {
+      const data = JSON.parse(localStorage.getItem("taskPages") || "{}");
+      return data[email] || [];
+    }
+
+    function savePages(pages) {
+      const data = JSON.parse(localStorage.getItem("taskPages") || "{}");
+      data[email] = pages;
+      localStorage.setItem("taskPages", JSON.stringify(data));
+    }
+
+    function createNewPage() {
+      const pageName = prompt("Enter the name of your new task page:");
+      if (!pageName) return;
+
+      const pages = getAllPages();
+      const newPage = { id: Date.now(), name: pageName };
+      pages.push(newPage);
+      savePages(pages);
+      renderPages();
+    }
+
+    function deletePage(id) {
+      const pages = getAllPages().filter(p => p.id !== id);
+      savePages(pages);
+      renderPages();
+    }
+
+    function renderPages() {
+      const pages = getAllPages();
+      const list = document.getElementById("pages-list");
+      const noPagesMessage = document.getElementById("no-pages-message");
+      list.innerHTML = "";
+
+      if (pages.length === 0) {
+        noPagesMessage.style.display = "block";
+      } else {
+        noPagesMessage.style.display = "none";
+        pages.forEach(page => {
+          const li = document.createElement("li");
+          li.innerHTML = `
+            <div style="display: flex; justify-content: space-between; align-items: center; background-color: var(--secondary-background-color); color: var(--text-color); padding: 10px; margin-bottom: 10px; border-radius: 8px;">
+              <span>${page.name}</span>
+              <div>
+                <a href="section.html?pageId=${page.id}" style="margin-right: 10px; color: var(--icons-color);" aria-label="Open the task page ${page.name}">Open</a>
+                <button onclick="deletePage(${page.id})" style="background-color: var(--error-color); border: none; color: white; padding: 5px 10px; border-radius: 5px; cursor: pointer;" aria-label="Delete task page ${page.name}">Delete</button>
+              </div>
+            </div>
+          `;
+          list.appendChild(li);
+        });
+      }
+    }
+
+    renderPages();
+  </script>
+</body>
+</html>
